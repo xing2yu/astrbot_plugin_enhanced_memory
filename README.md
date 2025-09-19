@@ -142,16 +142,18 @@ get_associated_memories_api(memory_id: str, max_results: int = 5) -> List[Dict[s
 
 获取关联记忆
 
+
+
 使用示例
 
 添加记忆：
 
-text
 /memory add 我喜欢编程 0.8
+
 /记忆添加 我最喜欢的水果是苹果 0.9
+
 搜索记忆：
 
-text
 
 /memory search 编程
 
@@ -159,15 +161,12 @@ text
 
 查看统计：
 
-text
 
 /memory stats
 
 /记忆统计
 
 导出记忆：
-
-text
 
 /memory export json
 
