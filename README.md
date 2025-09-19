@@ -1,4 +1,4 @@
-# helloworld
+# 记忆插件（可能不太好用）
 
 AstrBot 插件模板
 
