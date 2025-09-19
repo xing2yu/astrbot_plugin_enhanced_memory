@@ -1,0 +1,10 @@
+id: enhanced_memory
+name: 增强记忆插件
+version: 0.0.0
+author: 星辰向鱼
+description: 星鱼自制的记忆插件，支持向量搜索、分类、关联和自动提取
+repository: https://github.com/xing2yu/astrbot_plugin_enhanced_memory
+license: MIT
+tags:
+  - memory
+  - enhancement
