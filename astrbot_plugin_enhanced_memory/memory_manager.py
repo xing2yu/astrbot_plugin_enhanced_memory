@@ -1,15 +1,37 @@
 import json
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 import logging
 
-from .faiss_manager import FAISSManager
-from .memory_classifier import MemoryClassifier
-from .memory_graph import MemoryGraph
-from .memory_extractor import MemoryExtractor
-
+try:
+    from .faiss_manager import FAISSManager
+    from .memory_classifier import MemoryClassifier
+    from .memory_graph import MemoryGraph
+    from .memory_extractor import MemoryExtractor
+except ImportError as e:
+    logging.error(f"导入组件失败: {e}")
+    # 创建占位类
+    class FAISSManager:
+        def __init__(self, *args, **kwargs): pass
+        def add_memory(self, *args, **kwargs): return True
+        def remove_memory(self, *args, **kwargs): return True
+        def search_similar(self, *args, **kwargs): return []
+    
+    class MemoryClassifier:
+        def __init__(self, *args, **kwargs): pass
+        def classify(self, text): return {"其他": 1.0}
+    
+    class MemoryGraph:
+        def __init__(self, *args, **kwargs): pass
+        def add_memory(self, *args, **kwargs): pass
+        def add_association(self, *args, **kwargs): return True
+        def get_associated_memories(self, *args, **kwargs): return []
+    
+    class MemoryExtractor:
+        def __init__(self, *args, **kwargs): pass
+        def extract_from_text(self, text, context=None): return []
 logger = logging.getLogger("astrbot.plugin.enhanced_memory")
 
 class EnhancedMemoryManager:

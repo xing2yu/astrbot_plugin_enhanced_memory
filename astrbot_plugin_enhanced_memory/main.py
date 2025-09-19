@@ -1,4 +1,5 @@
 import os
+import threading
 from typing import Dict, Any, List, Optional
 
 from astrbot.api.star import Context, Star, register, StarTools
@@ -55,28 +56,50 @@ class EnhancedMemoryPlugin(Star):
         # 处理配置参数
         self.config = config or {}
         
-        # 获取数据目录
-        data_dir = StarTools.get_data_dir()
-        storage_path = self.config.get("storage_path", "data/plugin_data/enhanced_memory")
+        # 推迟初始化到实际需要时
+        self.memory_manager = None
+        self._storage_path = None
+        self._initialized = False
+        self._init_lock = threading.Lock()
         
-        # 如果是相对路径，转换为绝对路径
-        if not os.path.isabs(storage_path):
-            storage_path = os.path.join(data_dir, storage_path)
-        
-        # 确保存储路径存在
-        os.makedirs(storage_path, exist_ok=True)
-        
-        # 初始化记忆管理器
-        try:
-            self.memory_manager = EnhancedMemoryManager({
-                **self.config,
-                "storage_path": storage_path
-            })
-            logger.info("EnhancedMemory插件初始化完成")
-        except Exception as e:
-            logger.error(f"初始化记忆管理器失败: {e}")
-            # 使用简化版内存管理器作为后备
-            self.memory_manager = EnhancedMemoryManager({})
+        logger.info("EnhancedMemory插件初始化完成")
+    
+    def _initialize(self):
+        """同步初始化方法"""
+        with self._init_lock:
+            if self._initialized:
+                return
+                
+            # 获取数据目录
+            data_dir = StarTools.get_data_dir()
+            storage_path = self.config.get("storage_path", "data/plugin_data/enhanced_memory")
+            
+            # 如果是相对路径，转换为绝对路径
+            if not os.path.isabs(storage_path):
+                storage_path = os.path.join(data_dir, storage_path)
+            
+            # 确保存储路径存在
+            os.makedirs(storage_path, exist_ok=True)
+            
+            # 初始化记忆管理器
+            try:
+                self.memory_manager = EnhancedMemoryManager({
+                    **self.config,
+                    "storage_path": storage_path
+                })
+                self._storage_path = storage_path
+                self._initialized = True
+                logger.info("EnhancedMemory插件记忆管理器初始化完成")
+            except Exception as e:
+                logger.error(f"初始化记忆管理器失败: {e}")
+                # 使用简化版内存管理器作为后备
+                self.memory_manager = EnhancedMemoryManager({})
+                self._initialized = True
+    
+    async def ensure_initialized(self):
+        """确保插件已初始化"""
+        if not self._initialized:
+            self._initialize()
     
     # 定义记忆命令组
     @filter.command_group("memory")
@@ -88,6 +111,7 @@ class EnhancedMemoryPlugin(Star):
     async def memory_add(self, event: AstrMessageEvent, content: str, importance: float = 0.5):
         """添加新记忆 /memory add <内容> [重要性]"""
         try:
+            await self.ensure_initialized()
             memory_id = self.memory_manager.add_memory(content, importance)
             yield event.plain_result(f"✅ 已添加记忆 (ID: {memory_id})")
         except Exception as e:
@@ -98,6 +122,7 @@ class EnhancedMemoryPlugin(Star):
     async def memory_search(self, event: AstrMessageEvent, query: str, limit: int = 5):
         """搜索记忆 /memory search <查询词> [数量]"""
         try:
+            await self.ensure_initialized()
             memories = self.memory_manager.search_memories(query, limit)
             if memories:
                 response = "找到的相关记忆:\n\n"
@@ -116,6 +141,7 @@ class EnhancedMemoryPlugin(Star):
     async def memory_associate(self, event: AstrMessageEvent, memory_id_1: str, memory_id_2: str, relation_type: str):
         """关联记忆 /memory associate <ID1> <ID2> <关系类型>"""
         try:
+            await self.ensure_initialized()
             if self.memory_manager.add_association(memory_id_1, memory_id_2, relation_type):
                 yield event.plain_result("✅ 已关联记忆")
             else:
@@ -128,7 +154,8 @@ class EnhancedMemoryPlugin(Star):
     async def memory_export(self, event: AstrMessageEvent, format: str = "json"):
         """导出记忆 /memory export [格式:json/csv]"""
         try:
-            file_path = os.path.join(self.memory_manager.storage_path, f"memories_export.{format}")
+            await self.ensure_initialized()
+            file_path = os.path.join(self._storage_path, f"memories_export.{format}")
             if self.memory_manager.export_memories(file_path, format):
                 yield event.plain_result(f"✅ 记忆已导出到 {file_path}")
             else:
@@ -141,7 +168,8 @@ class EnhancedMemoryPlugin(Star):
     async def memory_import(self, event: AstrMessageEvent, format: str = "json"):
         """导入记忆 /memory import [格式:json/csv]"""
         try:
-            file_path = os.path.join(self.memory_manager.storage_path, f"memories_export.{format}")
+            await self.ensure_initialized()
+            file_path = os.path.join(self._storage_path, f"memories_export.{format}")
             if self.memory_manager.import_memories(file_path, format):
                 yield event.plain_result(f"✅ 已从 {file_path} 导入记忆")
             else:
@@ -154,6 +182,7 @@ class EnhancedMemoryPlugin(Star):
     async def memory_stats(self, event: AstrMessageEvent):
         """查看记忆统计 /memory stats"""
         try:
+            await self.ensure_initialized()
             stats = self.memory_manager.get_stats()
             
             response = "📊 记忆统计:\n"
@@ -178,6 +207,8 @@ class EnhancedMemoryPlugin(Star):
     def add_memory_api(self, content: str, importance: float = 0.5, memory_type: str = None) -> str:
         """API: 添加新记忆"""
         try:
+            if not self._initialized:
+                self._initialize()
             return self.memory_manager.add_memory(content, importance, memory_type)
         except Exception as e:
             logger.error(f"API添加记忆失败: {e}")
@@ -186,6 +217,8 @@ class EnhancedMemoryPlugin(Star):
     def search_memories_api(self, query: str, limit: int = 5, memory_type: str = None) -> List[Dict[str, Any]]:
         """API: 搜索记忆"""
         try:
+            if not self._initialized:
+                self._initialize()
             return self.memory_manager.search_memories(query, limit, memory_type=memory_type)
         except Exception as e:
             logger.error(f"API搜索记忆失败: {e}")
@@ -194,6 +227,8 @@ class EnhancedMemoryPlugin(Star):
     def get_associated_memories_api(self, memory_id: str, max_results: int = 5) -> List[Dict[str, Any]]:
         """API: 获取关联记忆"""
         try:
+            if not self._initialized:
+                self._initialize()
             return self.memory_manager.get_associated_memories(memory_id, max_results)
         except Exception as e:
             logger.error(f"API获取关联记忆失败: {e}")
@@ -203,7 +238,8 @@ class EnhancedMemoryPlugin(Star):
         """插件停止时的清理逻辑"""
         logger.info("EnhancedMemory插件正在停止...")
         try:
-            self.memory_manager.save_memories()
+            if self._initialized and hasattr(self.memory_manager, 'save_memories'):
+                self.memory_manager.save_memories()
             logger.info("EnhancedMemory插件已成功停止。")
         except Exception as e:
             logger.error(f"插件停止时保存记忆失败: {e}")
