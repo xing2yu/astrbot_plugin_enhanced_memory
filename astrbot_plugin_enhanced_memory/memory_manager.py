@@ -32,7 +32,9 @@ except ImportError as e:
     class MemoryExtractor:
         def __init__(self, *args, **kwargs): pass
         def extract_from_text(self, text, context=None): return []
-logger = logging.getLogger("astrbot.plugin.enhanced_memory")
+
+# 使用根记录器而不是特定名称的记录器
+logger = logging.getLogger()
 
 class EnhancedMemoryManager:
     def __init__(self, config: Dict[str, Any]):
@@ -373,29 +375,34 @@ class EnhancedMemoryManager:
             logger.error(f"导入记忆失败: {e}")
             return False
     
-    def get_stats(self) -> Dict[str, Any]:
-        """获取记忆统计信息"""
-        total_memories = len(self.memories)
-        
-        # 按类型统计
-        type_counts = {}
-        for memory in self.memories.values():
-            mem_type = memory.get("type", "其他")
-            type_counts[mem_type] = type_counts.get(mem_type, 0) + 1
-        
-        # 计算平均重要性
-        avg_importance = sum(m.get("importance", 0) for m in self.memories.values()) / total_memories if total_memories > 0 else 0
-        
-        # 获取图统计
-        graph_stats = {
-            "nodes": self.memory_graph.graph.number_of_nodes(),
-            "edges": self.memory_graph.graph.number_of_edges(),
-            "clusters": len(list(self.memory_graph.get_clusters()))
-        }
-        
-        return {
-            "total_memories": total_memories,
-            "type_counts": type_counts,
-            "average_importance": avg_importance,
-            "graph_stats": graph_stats
-        }
+def get_stats(self) -> Dict[str, Any]:
+    """获取记忆统计信息"""
+    total_memories = len(self.memories)
+    
+    # 按类型统计
+    type_counts = {}
+    for memory in self.memories.values():
+        mem_type = memory.get("type", "其他")
+        type_counts[mem_type] = type_counts.get(mem_type, 0) + 1
+    
+    # 计算平均重要性
+    avg_importance = sum(m.get("importance", 0) for m in self.memories.values()) / total_memories if total_memories > 0 else 0
+    
+    # 获取图统计，添加错误处理
+    graph_stats = {"nodes": 0, "edges": 0, "clusters": 0}
+    try:
+        if hasattr(self.memory_graph, 'graph') and self.memory_graph.graph is not None:
+            graph_stats = {
+                "nodes": self.memory_graph.graph.number_of_nodes(),
+                "edges": self.memory_graph.graph.number_of_edges(),
+                "clusters": len(list(self.memory_graph.get_clusters()))
+            }
+    except Exception as e:
+        logger.error(f"获取图统计失败: {e}")
+    
+    return {
+        "total_memories": total_memories,
+        "type_counts": type_counts,
+        "average_importance": avg_importance,
+        "graph_stats": graph_stats
+    }

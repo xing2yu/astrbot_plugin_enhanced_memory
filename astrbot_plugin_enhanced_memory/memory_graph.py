@@ -4,12 +4,13 @@ import os
 from typing import List, Dict, Any
 import logging
 
-logger = logging.getLogger("astrbot.plugin.enhanced_memory")
+# 使用根记录器而不是特定名称的记录器
+logger = logging.getLogger()
 
 class MemoryGraph:
     def __init__(self, graph_path: str):
         self.graph_path = graph_path
-        self.graph = nx.Graph()
+        self.graph = nx.Graph()  # 确保这行代码存在
         
         self._ensure_storage_path()
         self.load_graph()
@@ -32,7 +33,7 @@ class MemoryGraph:
                 logger.info("创建了新的记忆图")
         except Exception as e:
             logger.error(f"加载记忆图失败: {e}")
-            self.graph = nx.Graph()
+            self.graph = nx.Graph()  # 确保在异常情况下也初始化 graph 属性
     
     def save_graph(self):
         """保存记忆图"""

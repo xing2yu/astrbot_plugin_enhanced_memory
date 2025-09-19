@@ -4,9 +4,9 @@ import json
 import os
 from typing import List, Dict, Any
 import logging
-from sentence_transformers import SentenceTransformer
 
-logger = logging.getLogger("astrbot.plugin.enhanced_memory")
+# 使用根记录器而不是特定名称的记录器
+logger = logging.getLogger()
 
 class FAISSManager:
     def __init__(self, index_path: str, dimension: int = 384):
@@ -107,31 +107,39 @@ class FAISSManager:
             logger.error(f"从向量索引中移除记忆失败: {e}")
             return False
     
-    def search_similar(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """语义搜索相似记忆"""
-        try:
-            # 生成查询向量
-            query_embedding = self.embedding_model.encode([query])
-            query_embedding = np.array(query_embedding, dtype='float32')
-            
-            # 搜索相似向量
-            distances, indices = self.index.search(query_embedding, k)
-            
-            # 转换为记忆ID
-            results = []
-            for i, idx in enumerate(indices[0]):
-                if idx in self.index_to_id and idx != -1:
-                    results.append({
-                        "memory_id": self.index_to_id[idx],
-                        "similarity": 1.0 / (1.0 + distances[0][i]),  # 转换为相似度分数
-                        "distance": distances[0][i]
-                    })
-            
-            return results
-        except Exception as e:
-            logger.error(f"语义搜索失败: {e}")
-            return []
-    
+def search_similar(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    """语义搜索相似记忆"""
+    try:
+        # 生成查询向量
+        query_embedding = self.embedding_model.encode([query])
+        query_embedding = np.array(query_embedding, dtype='float32')
+        
+        # 搜索相似向量
+        distances, indices = self.index.search(query_embedding, k)
+        
+        # 添加调试信息
+        print(f"搜索查询: {query}")
+        print(f"索引总数: {self.index.ntotal}")
+        print(f"找到的索引: {indices}")
+        print(f"距离: {distances}")
+        
+        # 转换为记忆ID
+        results = []
+        for i, idx in enumerate(indices[0]):
+            if idx in self.index_to_id and idx != -1:
+                results.append({
+                    "memory_id": self.index_to_id[idx],
+                    "similarity": 1.0 / (1.0 + distances[0][i]),  # 转换为相似度分数
+                    "distance": distances[0][i]
+                })
+        
+        print(f"结果数量: {len(results)}")
+        
+        return results
+    except Exception as e:
+        logger.error(f"语义搜索失败: {e}")
+        return []
+        
     def rebuild_index(self):
         """重建索引，移除已删除的项目"""
         # 实现索引重建逻辑
