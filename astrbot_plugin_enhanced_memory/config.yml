@@ -1,6 +1,6 @@
 # 增强记忆插件配置
 enhanced_memory:
-  # 存储配置
+  # 存储配置 - 使用相对路径
   storage_path: "data/plugin_data/enhanced_memory"
   max_memories: 5000
   
@@ -26,4 +26,4 @@ enhanced_memory:
   # 记忆关联配置
   association:
     enabled: true
-    max_links: 5  # 每条记忆最大关联数
+    max_links: 20  # 每条记忆最大关联数

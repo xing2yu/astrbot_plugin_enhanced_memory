@@ -4,7 +4,7 @@ import jieba.analyse
 from typing import List, Dict, Any
 import logging
 
-logger = logging.getLogger("astrbot.plugin.enhanced_memory")
+logger = logging.getLogger()
 
 class MemoryExtractor:
     def __init__(self, min_importance: float = 0.3, extract_keywords: bool = True, max_keywords: int = 5):

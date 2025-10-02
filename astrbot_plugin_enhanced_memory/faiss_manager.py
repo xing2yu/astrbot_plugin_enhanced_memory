@@ -15,15 +15,25 @@ class FAISSManager:
         self.index = None
         self.id_to_index = {}  # 记忆ID到FAISS索引的映射
         self.index_to_id = {}  # FAISS索引到记忆ID的映射
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.embedding_model = None
         
         self._ensure_storage_path()
         self.load_index()
+        self._initialize_embedding_model()
     
     def _ensure_storage_path(self):
         """确保存储路径存在"""
         os.makedirs(os.path.dirname(self.index_path), exist_ok=True)
     
+    def _initialize_embedding_model(self):
+        """初始化嵌入模型"""
+        try:
+            from sentence_transformers import SentenceTransformer
+            self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        except ImportError as e:
+            logger.error(f"初始化嵌入模型失败: {e}")
+            self.embedding_model = None
+
     def load_index(self):
         """加载FAISS索引"""
         try:
@@ -69,6 +79,9 @@ class FAISSManager:
     def add_memory(self, memory_id: str, text: str):
         """添加记忆到向量索引"""
         try:
+            if self.embedding_model is None:
+                return False
+
             # 生成嵌入向量
             embedding = self.embedding_model.encode([text])
             embedding = np.array(embedding, dtype='float32')
@@ -107,38 +120,38 @@ class FAISSManager:
             logger.error(f"从向量索引中移除记忆失败: {e}")
             return False
     
-def search_similar(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-    """语义搜索相似记忆"""
-    try:
-        # 生成查询向量
-        query_embedding = self.embedding_model.encode([query])
-        query_embedding = np.array(query_embedding, dtype='float32')
-        
-        # 搜索相似向量
-        distances, indices = self.index.search(query_embedding, k)
-        
-        # 添加调试信息
-        print(f"搜索查询: {query}")
-        print(f"索引总数: {self.index.ntotal}")
-        print(f"找到的索引: {indices}")
-        print(f"距离: {distances}")
-        
-        # 转换为记忆ID
-        results = []
-        for i, idx in enumerate(indices[0]):
-            if idx in self.index_to_id and idx != -1:
-                results.append({
-                    "memory_id": self.index_to_id[idx],
-                    "similarity": 1.0 / (1.0 + distances[0][i]),  # 转换为相似度分数
-                    "distance": distances[0][i]
-                })
-        
-        print(f"结果数量: {len(results)}")
-        
-        return results
-    except Exception as e:
-        logger.error(f"语义搜索失败: {e}")
-        return []
+  def search_similar(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+        """语义搜索相似记忆"""
+        try:
+            # 生成查询向量
+            query_embedding = self.embedding_model.encode([query])
+            query_embedding = np.array(query_embedding, dtype='float32')
+            
+            # 搜索相似向量
+            distances, indices = self.index.search(query_embedding, k)
+            
+            # 添加调试信息
+            print(f"搜索查询: {query}")
+            print(f"索引总数: {self.index.ntotal}")
+            print(f"找到的索引: {indices}")
+            print(f"距离: {distances}")
+            
+            # 转换为记忆ID
+            results = []
+            for i, idx in enumerate(indices[0]):
+                if idx in self.index_to_id and idx != -1:
+                    results.append({
+                        "memory_id": self.index_to_id[idx],
+                        "similarity": 1.0 / (1.0 + distances[0][i]),  # 转换为相似度分数
+                        "distance": distances[0][i]
+                    })
+            
+            print(f"结果数量: {len(results)}")
+            
+            return results
+        except Exception as e:
+            logger.error(f"语义搜索失败: {e}")
+            return []
         
     def rebuild_index(self):
         """重建索引，移除已删除的项目"""
