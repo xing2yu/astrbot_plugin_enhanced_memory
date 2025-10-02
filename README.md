@@ -1,181 +1,75 @@
-# 记忆插件（可能不太好用）
-好吧，真的不太好用！！！
-最起码这一版不行...
+# astrbot_plugin_enhanced_memory（可能不太好用）
+需要手动安装依赖
 
 可以在文件memory_extractor内更改自动记忆的具体存储规则
 
 
-一下为具体命令
-
-
-英文：
-/memory add <内容> [重要性]
-
-/memory search <查询词> [数量]
-
-/memory associate <ID1> <ID2> <关系类型>
-
-/memory export [格式:json/csv]
-
-/memory import [格式:json/csv]
-
-/memory stats
-
-
-中文：
-/记忆添加 <内容> [重要性]
-
-/记忆搜索 <查询词> [数量]
-
-/记忆关联 <ID1> <ID2> <关系类型>
-
-/记忆导出 [格式:json/csv]
-
-/记忆导入 [格式:json/csv]
-
-/记忆统计
-
-
-主要命令组
-
-英文
-
-/memory - 记忆管理命令组
-
-中文
-
-/记忆 - 记忆管理命令组（中文别名）
-
-/内存 - 记忆管理命令组（中文别名）
-
-
-具体命令
-
-1. 添加记忆
-2. 
-英文命令: /memory add <内容> [重要性]
-
-中文命令: /记忆添加 <内容> [重要性] 或 /内存添加 <内容> [重要性]
-
-功能: 添加新记忆到系统中
-
-参数:
-
-<内容>: 要添加的记忆内容（必需）
-
-[重要性]: 记忆的重要性评分，范围0.0-1.0（可选，默认0.5）
-
-2. 搜索记忆
-英文命令: /memory search <查询词> [数量]
-
-中文命令: /记忆搜索 <查询词> [数量] 或 /内存搜索 <查询词> [数量]
-
-功能: 搜索相关记忆
-
-参数:
-
-<查询词>: 搜索关键词（必需）
-
-[数量]: 返回结果的最大数量（可选，默认5）
-
-3. 关联记忆
-
-英文命令: /memory associate <ID1> <ID2> <关系类型>
-
-中文命令: /记忆关联 <ID1> <ID2> <关系类型> 或 /内存关联 <ID1> <ID2> <关系类型>
-
-功能: 关联两个记忆
-
-参数:
-
-<ID1>: 第一个记忆的ID（必需）
-
-<ID2>: 第二个记忆的ID（必需）
-
-<关系类型>: 关联关系类型（必需）
-
-4. 导出记忆
-
-英文命令: /memory export [格式]
-
-中文命令: /记忆导出 [格式] 或 /内存导出 [格式]
-
-功能: 导出所有记忆到文件
-
-参数:
-
-[格式]: 导出格式，支持json或csv（可选，默认json）
-
-5. 导入记忆
-
-英文命令: /memory import [格式]
-
-中文命令: /记忆导入 [格式] 或 /内存导入 [格式]
-
-功能: 从文件导入记忆
-
-参数:
-
-[格式]: 导入格式，支持json或csv（可选，默认json）
-
-6. 查看统计
-
-英文命令: /memory stats
-
-中文命令: /记忆统计 或 /内存统计
-
-功能: 查看记忆统计信息
-
-参数: 无
-
-API方法（供其他插件调用）
-
-除了用户命令外，该插件还提供以下API方法供其他插件调用：
-
-add_memory_api(content: str, importance: float = 0.5, memory_type: str = None) -> str
-
-添加新记忆
-
-search_memories_api(query: str, limit: int = 5, memory_type: str = None) -> List[Dict[str, Any]]
-
-搜索记忆
-
-get_associated_memories_api(memory_id: str, max_results: int = 5) -> List[Dict[str, Any]]
-
-获取关联记忆
-
-
-
-使用示例
-
-添加记忆：
-
-/memory add 我喜欢编程 0.8
-
-/记忆添加 我最喜欢的水果是苹果 0.9
-
-搜索记忆：
-
-
-/memory search 编程
-
-/记忆搜索 水果
-
-查看统计：
-
-
-/memory stats
-
-/记忆统计
-
-导出记忆：
-
-/memory export json
-
-/记忆导出 csv
-
-A template plugin for AstrBot plugin feature
-
+步骤1：以管理员身份运行命令提示符
+按 Win + X，选择"Windows PowerShell（管理员）"或"命令提示符（管理员）"
+
+步骤2：执行安装命令
+复制以下命令到管理员命令提示符中执行：
+
+bash
+pip install networkx faiss-cpu sentence-transformers jieba numpy transformers torch --upgrade
+步骤3：如果遇到网络问题，使用国内镜像：
+bash
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple networkx faiss-cpu sentence-transformers jieba numpy transformers torch --upgrade
+🔧 Windows 特定优化安装
+由于你是 Windows 系统，某些包可能需要特殊处理：
+
+如果 torch 安装失败，使用官方命令：
+bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+如果 faiss-cpu 安装失败，尝试：
+bash
+# 先安装依赖
+pip install numpy
+# 然后安装 faiss
+pip install faiss-cpu --no-cache-dir
+专门的验证脚本
+运行验证脚本：
+bash
+python check_enhanced_deps.py
+
+常见问题解决方案：
+问题1：torch 安装失败
+
+bash
+# 使用官方PyTorch安装命令
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+问题2：faiss-cpu 安装失败
+
+bash
+# 先确保numpy已安装
+pip install numpy
+# 然后安装faiss
+pip install faiss-cpu --no-cache-dir --force-reinstall
+问题3：内存不足
+
+关闭其他应用程序
+
+分批安装依赖
+
+📊 预期结果
+安装成功后，/memory stats 应该显示类似这样的信息：
+
+text
+📊 记忆统计:
+总记忆数: 3
+平均重要性: 0.50
+存储模式: 完整功能模式
+
+按类型统计:
+  观点: 1
+  事件: 1  
+  其他: 1
+
+组件状态:
+  FAISS向量搜索: ✅ 可用
+  智能分类器: ✅ 可用
+  记忆关联图: ✅ 可用
+  自动提取器: ✅ 可用
 # 支持
 
 [帮助文档](https://astrbot.app)
