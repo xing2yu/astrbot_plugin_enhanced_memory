@@ -212,14 +212,23 @@ tail -f AstrBot/logs/astrbot.log
 grep "enhanced_memory" AstrBot/logs/astrbot.log
 📊 功能对比
 功能	基础版	增强版	完整版
+
 基础记忆管理	✅	✅	✅
+
 自动记忆提取	✅	✅	✅
-关键词搜索	  ✅	✅	✅
+
+关键词搜索	    ✅	✅	✅
+
 语义向量搜索	❌	✅	✅
-记忆关联      ❌	✅	✅
-AI智能梳理	  ❌	✅	✅
+
+记忆关联        ❌	✅	✅
+
+AI智能梳理	    ❌	✅	✅
+
 数据导入导出	❌	✅	✅
-多模型支持	  ❌	❌	✅
+
+多模型支持	    ❌	❌	✅
+
 🎉 进阶技巧
 1. 批量操作
 python
@@ -289,16 +298,27 @@ def _calculate_importance(self, message: str, conversation_history: List[Dict] =
     
     return min(importance, 1.0)  # 上限1.0
 3. 自动分类系统
+   
 def _classify_message_type(self, message: str) -> str:
+
     if any(word in message for word in ['喜欢', '讨厌', '爱', '恨', '偏好']):
+   
         return 'preference'      # 用户偏好
+   
     elif any(word in message for word in ['认为', '觉得', '想', '应该']):
+   
         return 'opinion'         # 观点看法
+   
     elif any(word in message for word in ['昨天', '今天', '明天', '小时', '分钟']):
+   
         return 'event'           # 时间事件
+   
     elif any(word in message for word in ['是', '有', '在', '属于']):
+   
         return 'fact'            # 事实信息
+   
     else:
+   
         return 'other'           # 其他类型
    
 ✨ 现在就开始使用增强记忆插件，打造属于你的智能记忆系统！
