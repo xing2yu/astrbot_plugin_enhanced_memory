@@ -1,339 +1,374 @@
 # astrbot_plugin_enhanced_memory（可能不太好用）
-⚙️ 环境配置
-必需依赖
+增强记忆插件 v1.0 - 完整使用指南
+📖 插件简介
+增强记忆插件是一个智能的记忆管理系统，能够帮助AI机器人记住重要的对话内容、用户偏好、个人事实等信息。通过AI技术，它可以自动提取重要信息、智能分类记忆、建立记忆关联，让你与AI的对话更加个性化和连贯。
+
+🚀 快速开始
+1. 安装插件
+将插件文件夹放置在AstrBot的插件目录中，然后安装所需依赖：
+
 bash
-# 基础依赖（必需）
-pip install jieba pydantic
-增强依赖（推荐安装）
-bash
-# 语义搜索功能
-pip install faiss-cpu sentence-transformers
+# 基础功能（必需）
+pip install jieba networkx numpy pydantic
 
-# 记忆图谱功能  
-pip install networkx
+# 完整功能（推荐）
+pip install faiss-cpu sentence-transformers transformers torch
 
-# AI梳理功能（需要LLM提供商）
-pip install transformers torch
-完整一键安装
-bash
-pip install jieba pydantic faiss-cpu sentence-transformers networkx transformers torch
-🔧 AstrBot配置
-1. 启用插件
-启动AstrBot
+2. 基础配置
+在AstrBot的插件配置界面中，进行以下基本设置：
 
-访问WebUI (通常是 http://localhost:8000)
+存储路径：记忆数据的保存位置（默认即可）
 
-进入"插件管理"
+最大记忆数量：建议5000-10000条
 
-找到"增强记忆插件 v3.0"
+启用自动提取：开启后AI会自动从对话中学习
 
-点击"启用"
+启用AI集成：让AI在回复时参考相关记忆
 
-2. 配置LLM提供商（AI梳理功能必需）
-进入"设置" → "AI提供商"
-
-添加你喜欢的LLM提供商：
-
-OpenAI GPT系列
-
-Azure OpenAI
-
-其他兼容的LLM服务
-
-配置API密钥和参数
-
-保存配置
-
-3. 插件配置（可选）
-在插件配置页面可以调整：
-
-存储路径: 记忆数据保存位置
-
-自动提取: 是否从对话自动提取记忆
-
-AI梳理: 启用智能记忆整理
-
-搜索设置: 搜索结果数量和搜索方式
-
-🚀 基础使用
+🎯 基础功能使用
 1. 添加记忆
-bash
-# 基础添加
-/memo_add "用户喜欢蓝色"
+text
+/memo_add [记忆内容]
+或
+/记忆添加 [记忆内容]
 
-# 带重要性评分
-/memo_add "用户是程序员" --importance 0.8
+示例：
 
-# 指定类型
-/memo_add "明天要开会" --type event
+
+/memo_add 用户喜欢喝咖啡，不喜欢喝茶
+
+/memo_add 用户的生日是5月20日
+
 2. 搜索记忆
-bash
-# 基础搜索
-/memo_search "颜色"
+   
 
-# 限制结果数量
-/memo_search "工作" 10
+/memo_search [关键词] [数量(可选)]
+或
+/记忆搜索 [关键词] [数量(可选)]
 
-# 语义搜索（需要sentence-transformers）
-/memo_search "编程相关" --use_semantic
-3. 管理记忆
-bash
-# 查看统计
+示例：
+
+/memo_search 咖啡           # 搜索关于咖啡的记忆
+
+/memo_search 生日 10        # 搜索生日相关记忆，最多10条
+
+3. 删除记忆
+
+/memo_delete [记忆ID]
+或
+/记忆删除 [记忆ID]
+
+如何获取记忆ID？
+
+在搜索结果中会显示记忆ID（前8位）
+
+使用 /memo_stats 查看所有记忆
+
+4. 查看记忆状态
+
 /memo_stats
+或
+/记忆统计
 
-# 删除记忆（需要记忆ID）
-/memo_delete "记忆ID"
+这会显示：
 
-# 关联记忆
-/memo_associate "记忆ID1" "记忆ID2"
-🤖 高级功能
-AI智能梳理
-bash
-# 全面梳理记忆库
-/memo_organize all
+记忆总数
 
-# 指定任务梳理
-/memo_organize categorize,suggest_associations
+各类记忆分布
 
-# 使用特定模型
-/memo_organize all model_id=your_model_id
+平均重要性
 
-# 应用梳理建议
+系统状态
+
+🤖 AI智能功能
+
+
+1. AI智能提取记忆
+
+/memo_ai_extract [对话内容]
+或
+/AI提取 [对话内容]
+
+示例：
+
+/memo_ai_extract 今天学到了很多关于机器学习的新知识，特别是深度学习方面的内容
+
+AI会自动分析并提取重要信息作为记忆。
+
+2. AI记忆梳理
+
+/memo_organize [任务类型] [模型ID(可选)]
+或
+/记忆梳理 [任务类型] [模型ID(可选)]
+
+任务类型：
+
+all - 全部任务
+
+categorize - 重新分类
+
+summarize - 总结记忆库
+
+find_duplicates - 检测重复
+
+suggest_associations - 建议关联
+
+suggest_importance - 调整重要性
+
+sentiment_analysis - 情感分析
+
+示例：
+
+
+/memo_organize all                    # 执行所有梳理任务
+
+/memo_organize categorize,summarize   # 只执行分类和总结
+
+3. 应用梳理建议
+
 /memo_apply_org
-数据管理
-bash
-# 导出记忆（JSON格式）
-/memo_export json
+或
+/应用梳理
 
-# 导出记忆（CSV格式）
+在执行完AI梳理后，使用此命令应用AI的建议。
+
+4. 查看可用AI模型
+   
+/memo_models
+或
+/可用模型
+
+显示当前可用的AI模型列表。
+
+🔗 记忆关联功能
+
+1. 手动关联记忆
+
+/memo_associate [记忆ID1] [记忆ID2]
+或
+/记忆关联 [记忆ID1] [记忆ID2]
+
+示例：
+
+/memo_associate abc123 def456
+
+2. 查看关联记忆
+   
+在搜索时添加参数查看关联记忆：
+
+/memo_search 咖啡 include_associated=true
+
+📊 数据管理
+
+1. 导出记忆
+
+/memo_export [格式]
+或
+/记忆导出 [格式]
+
+格式选项：
+
+json - JSON格式（推荐）
+
+csv - CSV表格格式
+
+示例：
+
+
+/memo_export json
 /memo_export csv
 
-# 导入记忆
-/memo_import "路径/记忆文件.json"
-系统信息
-bash
-# 检查依赖状态
-/memo_deps
+2. 导入记忆
 
-# 查看可用AI模型
-/memo_models
+/memo_import [文件路径] [格式]
+或
+/记忆导入 [文件路径] [格式]
 
-# 显示完整帮助
-/memo_help
-💡 使用技巧
-1. 自动化记忆提取
-插件会自动从对话中提取重要信息
+示例：
 
-包含个人信息、偏好、事实等内容
 
-可配置提取敏感度
+/memo_import memories_backup.json json
 
-2. 智能关联建立
-自动基于关键词相似度建立记忆关联
+⚙️ 高级配置指南
 
-支持手动建立特定关联
+1. 自动提取设置
+   
+在插件配置中调整：
 
-关联记忆会在搜索时一并显示
+最低重要性阈值：0.3（建议值）
 
-3. AI梳理最佳实践
-bash
-# 定期梳理保持记忆库整洁
-/memo_organize all
+值越高，只有更重要信息会被记住
 
-# 先预览再应用
-/memo_organize categorize
-/memo_apply_org
+值越低，更多信息会被自动记忆
 
-# 针对性梳理特定问题
-/memo_organize find_duplicates
-🎯 实战示例
-场景一：个人助理
-bash
-# 记录用户偏好
-/memo_add "用户不喜欢吃辣"
-/memo_add "用户每天早9点上班"
+提取关键词：开启
 
-# 搜索相关信息
-/memo_search "饮食偏好"
-/memo_search "工作时间"
-场景二：知识管理
-bash
-# 添加技术知识
-/memo_add "Python的GIL是全局解释器锁"
-/memo_add "JavaScript是单线程语言"
+自动为每条记忆提取关键词，提高搜索准确性
 
-# 建立知识关联
-/memo_associate "记忆ID1" "记忆ID2"
+2. AI模型配置
+   
+使用框架模型：开启
 
-# AI梳理知识结构
-/memo_organize categorize,suggest_associations
-场景三：项目跟踪
-bash
-# 记录项目信息
-/memo_add "项目A需要在周五前完成"
-/memo_add "客户对UI颜色有特殊要求"
+主要处理模型：选择你常用的AI模型
 
-# 导出项目记忆
-/memo_export json
-🔍 故障排除
-常见问题
-Q: 插件无法加载
+自动提取模型：（可选）专门用于记忆提取的模型
 
-text
-A: 检查：
-1. 插件目录是否正确：AstrBot/data/plugins/astrbot_plugin_enhanced_memory
-2. 依赖是否安装：pip install jieba pydantic
-3. 查看AstrBot日志文件
-Q: AI梳理功能不可用
+回退到默认模型：开启（确保功能稳定）
 
-text
-A: 检查：
-1. LLM提供商是否配置正确
-2. API密钥是否有效
-3. 网络连接是否正常
-Q: 语义搜索不工作
+3. 记忆分类权重
+   
+可以调整不同类型记忆的重要性：
 
-text
-A: 安装依赖：
-pip install faiss-cpu sentence-transformers
-Q: 记忆数据丢失
 
-text
-A: 数据存储在：data/plugin_data/enhanced_memory/
-定期使用 /memo_export 备份数据
-日志检查
-查看AstrBot日志了解详细状态：
-
-bash
-# 查看实时日志
-tail -f AstrBot/logs/astrbot.log
-
-# 搜索插件相关日志
-grep "enhanced_memory" AstrBot/logs/astrbot.log
-
-📊 功能对比
-
-功能	基础版	增强版	完整版
-
-基础记忆管理	✅	✅	✅
-
-自动记忆提取	✅	✅	✅
-
-关键词搜索	    ✅	✅	✅
-
-语义向量搜索	❌	✅	✅
-
-记忆关联        ❌	✅	✅
-
-AI智能梳理	    ❌	✅	✅
-
-数据导入导出	❌	✅	✅
-
-多模型支持	    ❌	❌	✅
-
-🎉 进阶技巧
-1. 批量操作
-
-# 可以通过脚本批量导入记忆
-
-import json
-
-memories = {
-
-    "记忆1": {"content": "内容1", "type": "fact"},
-    
-    "记忆2": {"content": "内容2", "type": "preference"}
-    
+{
+  "事实": 0.8,        // 客观信息
+  "观点": 0.6,        // 主观看法
+  "用户偏好": 1.0,     // 用户喜好（最重要）
+  "事件": 0.7,        // 时间相关事件
+  "关系": 0.9,        // 人际关系
+  "其他": 0.3         // 其他内容
 }
 
-with open("batch_import.json", "w") as f:
+🎪 使用场景示例
 
-    json.dump(memories, f)
-    
-# 然后使用 /memo_import 导入
+场景1：个人助理
+目标：让AI记住你的生活习惯和偏好
 
-2. 自定义配置
+
+你：我喜欢在早上喝美式咖啡，不加糖
+AI：（自动记忆）→ 已记录用户咖啡偏好
+
+你：我对花生过敏
+AI：（自动记忆）→ 已记录用户过敏信息
+
+你：每周三我要去健身房
+AI：（自动记忆）→ 已记录用户日程习惯
+后续对话：
+
+
+你：今天有什么建议？
+AI：考虑到您周三要去健身房，建议早餐多吃蛋白质。另外记得您喜欢美式咖啡，早上可以来一杯提神。
+
+场景2：学习伙伴
+目标：记住学习进度和知识点
+
+
+/memo_add 用户正在学习Python编程
+/memo_add 用户已经掌握了函数和类的基本概念
+/memo_add 用户对装饰器的理解还不够深入
+后续对话：
+
+
+你：我应该学习什么？
+AI：根据您的学习记录，建议继续深入学习Python装饰器，这是您之前觉得有难度的部分。
+
+场景3：项目协作
+目标：记住项目细节和分工
+
+
+/memo_add 项目A的截止日期是12月31日
+/memo_add 用户负责项目A的前端开发
+/memo_add 项目需要使用React框架
+
+🔧 故障排除
+
+1. 记忆搜索不到
    
-在 _conf_schema.json 中可以自定义：
+问题：使用/memo_search找不到记忆
 
-记忆分类类型
+解决方案：
 
-自动提取规则
+检查记忆是否成功添加（使用/memo_stats）
 
-搜索参数
+尝试更简单的关键词
 
-AI梳理任务
+确保自动提取功能已开启
 
-3. 集成工作流
-将记忆插件与其他插件结合：
-
-与任务管理插件联动
-
-与日程安排插件集成
-
-作为AI对话的长期记忆库
-
-阈值调整建议
-0.1-0.3: 宽松模式 - 提取更多记忆
-
-0.3-0.5: 平衡模式 - 推荐设置
-
-0.5-0.7: 严格模式 - 只提取重要信息
-
-0.7-1.0: 极严格 - 基本只提取关键信息
-
-🔍 关键词识别
-
-# 个人信息识别
-personal_indicators = ["我", "我的", "自己", "个人"]
-
-# 偏好信息识别  
-preference_indicators = ["喜欢", "讨厌", "爱", "恨", "偏好", "习惯"]
-
-# 事实信息识别
-fact_indicators = ["是", "有", "在", "属于", "知道", "记得"]
-
-# 时间信息识别
-time_indicators = ["昨天", "今天", "明天", "上周", "去年"]
-
-📊 重要性评分算法
-
-def _calculate_importance(self, message: str, conversation_history: List[Dict] = None) -> float:
-    importance = 0.1  # 基础分
-    
-    # 维度加分
-    +0.3  # 包含个人信息
-    +0.4  # 包含偏好信息  
-    +0.2  # 包含事实信息
-    +0.2  # 包含时间信息
-    +0.3  # 重要问题回答
-    
-    return min(importance, 1.0)  # 上限1.0
-3. 自动分类系统
+2. AI功能不可用
    
-def _classify_message_type(self, message: str) -> str:
+问题：AI梳理、提取等功能报错
 
-    if any(word in message for word in ['喜欢', '讨厌', '爱', '恨', '偏好']):
+解决方案：
+
+检查AI模型配置是否正确
+
+确认已安装必要的依赖
+
+查看日志文件获取详细错误信息
+
+3. 性能问题
    
-        return 'preference'      # 用户偏好
+问题：插件运行缓慢
+
+解决方案：
+
+减少最大记忆数量
+
+关闭不必要的AI功能
+
+定期使用/memo_organize find_duplicates清理重复记忆
+
+4. 依赖检查
+
+/memo_deps
+或
+/依赖检查
+查看所需依赖的安装状态。
+
+💡 最佳实践
+1. 记忆质量
+具体明确：避免模糊表述
+
+相关信息：包含上下文关系
+
+定期整理：每月使用AI梳理一次
+
+2. 搜索技巧
+使用具体关键词而非抽象概念
+
+结合多个关键词缩小范围
+
+利用关联记忆发现相关信息
+
+3. AI协作
+让AI自动提取，人工审核重要记忆
+
+定期使用AI梳理保持记忆库整洁
+
+根据使用反馈调整重要性权重
+
+🆘 获取帮助
+
+1. 帮助命令
    
-    elif any(word in message for word in ['认为', '觉得', '想', '应该']):
+/memo_help
+或
+/记忆帮助
+
+查看完整的命令列表和使用示例。
+
+4. 系统信息
    
-        return 'opinion'         # 观点看法
-   
-    elif any(word in message for word in ['昨天', '今天', '明天', '小时', '分钟']):
-   
-        return 'event'           # 时间事件
-   
-    elif any(word in message for word in ['是', '有', '在', '属于']):
-   
-        return 'fact'            # 事实信息
-   
-    else:
-   
-        return 'other'           # 其他类型
-   
-✨ 现在就开始使用增强记忆插件，打造属于你的智能记忆系统！
+/memo_stats        # 记忆系统状态
+/memo_deps         # 依赖状态
+/memo_model_info   # AI模型信息
+
+🎊 开始使用吧！
+现在你已经了解了增强记忆插件的所有功能，可以开始：
+
+添加一些测试记忆，熟悉基本操作
+
+开启自动提取，让AI在对话中学习
+
+尝试AI梳理，优化记忆库结构
+
+定期导出备份，防止数据丢失
+
+记住，一个好的记忆系统需要时间培养。随着使用，你会发现AI越来越了解你，对话也越来越个性化！
+
+祝你使用愉快！ 🚀
+
+
 # 支持
 
 [帮助文档](https://astrbot.app)
