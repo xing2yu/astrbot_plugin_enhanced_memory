@@ -210,7 +210,9 @@ tail -f AstrBot/logs/astrbot.log
 
 # 搜索插件相关日志
 grep "enhanced_memory" AstrBot/logs/astrbot.log
+
 📊 功能对比
+
 功能	基础版	增强版	完整版
 
 基础记忆管理	✅	✅	✅
@@ -231,17 +233,27 @@ AI智能梳理	    ❌	✅	✅
 
 🎉 进阶技巧
 1. 批量操作
-python
+
 # 可以通过脚本批量导入记忆
+
 import json
+
 memories = {
+
     "记忆1": {"content": "内容1", "type": "fact"},
+    
     "记忆2": {"content": "内容2", "type": "preference"}
+    
 }
+
 with open("batch_import.json", "w") as f:
+
     json.dump(memories, f)
+    
 # 然后使用 /memo_import 导入
+
 2. 自定义配置
+   
 在 _conf_schema.json 中可以自定义：
 
 记忆分类类型
