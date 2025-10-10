@@ -1,0 +1,40 @@
+# 增强记忆插件配置
+enhanced_memory:
+  # 存储配置 - 使用相对路径
+  storage_path: "data/plugin_data/enhanced_memory"
+  max_memories: 5000
+  
+  # FAISS 向量数据库配置
+  faiss:
+    index_path: "data/plugin_data/enhanced_memory/faiss_index"
+    dimension: 384  # all-MiniLM-L6-v2 模型的维度
+    nprobe: 10  # 搜索时探查的聚类中心数量
+    
+  # 记忆分类配置
+  classification:
+    enabled: true
+    model_path: "data/plugin_data/enhanced_memory/classification_model"
+    categories: ["事实", "观点", "用户偏好", "事件", "关系"]
+    
+  # 自动提取配置
+  auto_extraction:
+    enabled: true
+    min_importance: 0.3  # 自动提取的最低重要性阈值
+    extract_keywords: true
+    max_keywords: 5
+    
+  # 记忆关联配置
+  association:
+    enabled: true
+    max_links: 15  # 每条记忆最大关联数
+    
+  # 上下文联通功能配置
+  context_integration:
+    enabled: true  # 是否启用上下文联通功能
+    auto_extract: true  # 是否自动从对话中提取记忆
+    search_limit: 20  # 上下文搜索返回的记忆数量
+    max_context_length: 500  # 最大对话上下文长度
+  
+  performance:
+    auto_save_interval: 300  # 自动保存间隔（秒）
+    max_search_results: 50   # 最大搜索结果数

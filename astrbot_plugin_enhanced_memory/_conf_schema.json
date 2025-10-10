@@ -1,0 +1,490 @@
+{
+  "basic_settings": {
+    "type": "object",
+    "description": "基础设置",
+    "items": {
+      "storage_path": {
+        "type": "string",
+        "description": "数据存储路径",
+        "default": "plugin_data/enhanced_memory",
+        "hint": "记忆数据存储的目录路径（相对于AstrBot数据目录）",
+        "obvious_hint": true
+      },
+      "max_memories": {
+        "type": "int",
+        "description": "最大记忆数量",
+        "default": 5000,
+        "hint": "最多保存多少条记忆，超过时会自动清理不重要的记忆",
+        "min": 100,
+        "max": 100000
+      }
+    }
+  },
+  
+  "ai_model_settings": {
+    "type": "object",
+    "description": "AI模型设置",
+    "items": {
+      "use_framework_models": {
+        "type": "bool",
+        "description": "使用框架配置的模型",
+        "default": true,
+        "hint": "使用已在AstrBot框架中配置的AI模型处理记忆",
+        "obvious_hint": true
+      },
+      "primary_processing_model": {
+        "type": "string",
+        "description": "主要记忆处理模型",
+        "default": "",
+        "hint": "用于记忆梳理、分类、关联等核心处理任务的AI模型",
+        "_special": "select_provider",
+        "obvious_hint": true
+      },
+      "auto_extraction_model": {
+        "type": "string",
+        "description": "自动提取专用模型",
+        "default": "",
+        "hint": "专门用于自动记忆提取的AI模型（留空使用主要模型）",
+        "_special": "select_provider"
+      },
+      "classification_model": {
+        "type": "string",
+        "description": "分类专用模型",
+        "default": "",
+        "hint": "专门用于记忆分类的AI模型（留空使用主要模型）",
+        "_special": "select_provider"
+      },
+      "fallback_to_default": {
+        "type": "bool",
+        "description": "回退到默认模型",
+        "default": true,
+        "hint": "当指定模型不可用时，自动使用系统默认模型"
+      },
+      "model_load_strategy": {
+        "type": "string",
+        "description": "模型加载策略",
+        "default": "dynamic",
+        "options": ["dynamic", "preload", "on_demand"],
+        "hint": "dynamic: 动态加载 | preload: 预加载 | on_demand: 按需加载"
+      }
+    }
+  },
+  
+  "feature_switches": {
+    "type": "object",
+    "description": "功能开关",
+    "items": {
+      "auto_extraction_enabled": {
+        "type": "bool",
+        "description": "启用自动记忆提取",
+        "default": true,
+        "hint": "是否自动从对话中提取重要信息作为记忆"
+      },
+      "ai_integration_enabled": {
+        "type": "bool",
+        "description": "启用AI记忆集成",
+        "default": true,
+        "hint": "是否在AI对话时自动注入相关记忆"
+      },
+      "organization_enabled": {
+        "type": "bool",
+        "description": "启用AI记忆梳理",
+        "default": true,
+        "hint": "是否启用AI模型梳理记忆功能"
+      },
+      "semantic_search_enabled": {
+        "type": "bool",
+        "description": "启用语义搜索",
+        "default": true,
+        "hint": "是否使用语义搜索（需要sentence-transformers）"
+      },
+      "category_weights_enabled": {
+        "type": "bool",
+        "description": "启用类别重要性权重",
+        "default": true,
+        "hint": "是否使用自定义的类别重要性权重来调整记忆重要性计算",
+        "obvious_hint": true
+      }
+    }
+  },
+  
+  "auto_extraction_config": {
+    "type": "object",
+    "description": "自动提取配置",
+    "items": {
+      "min_importance": {
+        "type": "float",
+        "description": "最低重要性阈值",
+        "default": 0.3,
+        "hint": "自动提取的最低重要性阈值，0-1之间",
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.1
+      },
+      "extract_keywords": {
+        "type": "bool",
+        "description": "提取关键词",
+        "default": true,
+        "hint": "是否自动提取记忆内容的关键词"
+      },
+      "max_keywords": {
+        "type": "int",
+        "description": "最大关键词数量",
+        "default": 5,
+        "hint": "每条记忆最多提取的关键词数量",
+        "min": 1,
+        "max": 20
+      },
+      "extraction_prompt": {
+        "type": "text",
+        "description": "提取提示词",
+        "default": "请从以下对话中提取可能重要的信息作为长期记忆。重点关注：个人偏好、重要事实、情感表达、重复提到的话题。",
+        "hint": "指导AI如何从对话中提取记忆的提示词，可以自定义修改以适应不同场景",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "extraction_prompt_template": {
+        "type": "text",
+        "description": "提取提示词模板",
+        "default": "请分析以下对话内容，提取用户的重要个人信息、偏好、习惯、经历等作为长期记忆。重点关注：\n1. 个人基本信息（姓名、年龄、职业等）\n2. 兴趣爱好和偏好\n3. 重要经历和事件\n4. 情感表达和态度\n5. 重复提到的主题\n6. 技能和专长\n\n对话内容：\n{conversation_history}\n\n最新消息：{current_message}\n\n请提取重要信息：",
+        "hint": "完整的提取提示词模板，支持 {conversation_history} 和 {current_message} 变量",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      }
+    }
+  },
+  
+  "memory_processing_config": {
+    "type": "object",
+    "description": "记忆处理配置",
+    "items": {
+      "processing_tasks": {
+        "type": "list",
+        "description": "默认处理任务",
+        "default": ["categorize", "summarize", "suggest_associations"],
+        "options": ["categorize", "summarize", "find_duplicates", "suggest_associations", "suggest_importance", "extract_keywords", "sentiment_analysis"],
+        "hint": "AI模型执行的记忆处理任务列表（可多选）"
+      },
+      "auto_process_interval": {
+        "type": "int",
+        "description": "自动处理间隔(天)",
+        "default": 7,
+        "hint": "自动执行记忆处理的间隔天数，0表示禁用自动处理",
+        "min": 0,
+        "max": 30
+      },
+      "process_new_memories": {
+        "type": "bool",
+        "description": "自动处理新记忆",
+        "default": true,
+        "hint": "是否自动对新添加的记忆进行AI处理"
+      },
+      "batch_processing_size": {
+        "type": "int",
+        "description": "批量处理大小",
+        "default": 10,
+        "hint": "每次批量处理的记忆数量",
+        "min": 1,
+        "max": 100
+      },
+      "processing_prompt": {
+        "type": "text",
+        "description": "处理提示词",
+        "default": "请分析以下记忆内容，进行智能分类、总结和关联建议。重点关注记忆的重要性、相关性和潜在联系。",
+        "hint": "指导AI如何处理记忆的提示词，可以自定义修改以适应不同需求",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "categorization_prompt": {
+        "type": "text",
+        "description": "分类提示词",
+        "default": "请分析以下记忆内容，并建议更好的分类方式。当前分类有：事实(fact)、观点(opinion)、用户偏好(preference)、事件(event)、其他(other)。请为每段记忆建议更准确的分类，并可以建议新的分类类别。",
+        "hint": "分类任务的专用提示词",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "summarization_prompt": {
+        "type": "text",
+        "description": "总结提示词",
+        "default": "请总结以下记忆库的主要内容、主题分布和关键信息：",
+        "hint": "总结任务的专用提示词",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "association_prompt": {
+        "type": "text",
+        "description": "关联提示词",
+        "default": "请分析以下记忆内容，建议应该建立关联的记忆对：",
+        "hint": "关联建议任务的专用提示词",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      }
+    }
+  },
+  
+  "association_config": {
+    "type": "object",
+    "description": "记忆关联配置",
+    "items": {
+      "auto_associate": {
+        "type": "bool",
+        "description": "自动建立关联",
+        "default": true,
+        "hint": "是否自动为新增记忆建立关联"
+      },
+      "association_threshold": {
+        "type": "float",
+        "description": "自动关联阈值",
+        "default": 0.3,
+        "hint": "自动建立关联的相似度阈值",
+        "min": 0.1,
+        "max": 1.0,
+        "step": 0.1
+      },
+      "max_associations": {
+        "type": "int",
+        "description": "最大关联数量",
+        "default": 15,
+        "hint": "每条记忆最多关联的其他记忆数量",
+        "min": 5,
+        "max": 50
+      },
+      "use_ai_for_associations": {
+        "type": "bool",
+        "description": "使用AI建议关联",
+        "default": true,
+        "hint": "是否使用AI模型建议记忆关联，而不仅仅是基于关键词"
+      }
+    }
+  },
+  
+  "search_config": {
+    "type": "object",
+    "description": "搜索配置",
+    "items": {
+      "default_limit": {
+        "type": "int",
+        "description": "默认搜索结果数量",
+        "default": 5,
+        "hint": "搜索时默认返回的记忆数量",
+        "min": 1,
+        "max": 50
+      },
+      "include_associated": {
+        "type": "bool",
+        "description": "包含关联记忆",
+        "default": true,
+        "hint": "搜索结果是否包含关联记忆"
+      },
+      "search_timeout": {
+        "type": "int",
+        "description": "搜索超时时间(秒)",
+        "default": 10,
+        "hint": "语义搜索的最大等待时间",
+        "min": 1,
+        "max": 60
+      },
+      "use_hybrid_search": {
+        "type": "bool",
+        "description": "启用混合搜索",
+        "default": true,
+        "hint": "同时使用关键词搜索和语义搜索"
+      }
+    }
+  },
+  
+  "advanced_settings": {
+    "type": "object",
+    "description": "高级设置",
+    "items": {
+      "embedding_model": {
+        "type": "string",
+        "description": "嵌入模型名称",
+        "default": "all-MiniLM-L6-v2",
+        "hint": "用于语义搜索的句子嵌入模型名称",
+        "options": ["all-MiniLM-L6-v2", "paraphrase-multilingual-MiniLM-L12-v2", "distiluse-base-multilingual-cased"]
+      },
+      "embedding_dimension": {
+        "type": "int",
+        "description": "向量维度",
+        "default": 384,
+        "hint": "嵌入向量的维度大小",
+        "min": 128,
+        "max": 1024
+      },
+      "auto_save_interval": {
+        "type": "int",
+        "description": "自动保存间隔(秒)",
+        "default": 300,
+        "hint": "自动保存记忆数据的间隔时间",
+        "min": 60,
+        "max": 3600
+      },
+      "enable_debug_log": {
+        "type": "bool",
+        "description": "启用调试日志",
+        "default": false,
+        "hint": "是否输出详细的调试日志信息"
+      },
+      "max_concurrent_ai_requests": {
+        "type": "int",
+        "description": "最大并发AI请求数",
+        "default": 3,
+        "hint": "同时处理AI记忆任务的最大数量",
+        "min": 1,
+        "max": 10
+      },
+      "model_cache_ttl": {
+        "type": "int",
+        "description": "模型缓存时间(分钟)",
+        "default": 60,
+        "hint": "AI模型实例的缓存时间",
+        "min": 5,
+        "max": 1440
+      },
+      "custom_prompts": {
+        "type": "text",
+        "description": "自定义提示词库",
+        "default": "{\n  \"extraction_presets\": {\n    \"default\": \"请从以下对话中提取可能重要的信息作为长期记忆。重点关注：个人偏好、重要事实、情感表达、重复提到的话题。\",\n    \"detailed\": \"请详细分析对话内容，提取以下类型的信息：\\n1. 个人基本信息\\n2. 兴趣爱好\\n3. 重要经历\\n4. 情感态度\\n5. 重复主题\\n6. 技能专长\\n7. 社交关系\\n8. 未来计划\",\n    \"minimal\": \"仅提取最关键的个人信息和偏好\"\n  },\n  \"processing_presets\": {\n    \"default\": \"请分析以下记忆内容，进行智能分类、总结和关联建议。\",\n    \"detailed\": \"请对记忆库进行全面分析：分类整理、去重检测、关联建议、重要性评估、情感分析\",\n    \"minimal\": \"简单分类和总结记忆内容\"\n  }\n}",
+        "hint": "预设的提示词模板，可以在这里管理多个提示词预设",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      }
+    }
+  },
+  
+  "memory_categories": {
+    "type": "object",
+    "description": "记忆分类配置",
+    "items": {
+      "custom_categories": {
+        "type": "list",
+        "description": "自定义记忆分类",
+        "default": ["事实", "观点", "用户偏好", "事件", "关系", "其他"],
+        "hint": "自定义的记忆分类标签",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      },
+      "enable_auto_classification": {
+        "type": "bool",
+        "description": "启用自动分类",
+        "default": true,
+        "hint": "是否自动对记忆内容进行分类"
+      },
+      "classification_prompt": {
+        "type": "text",
+        "description": "分类规则提示词",
+        "default": "请根据以下规则对记忆内容进行分类：\n- 事实：包含客观事实、信息、数据\n- 观点：包含主观看法、评价、判断\n- 用户偏好：包含喜欢、讨厌、偏好等情感倾向\n- 事件：包含时间、地点、发生的事件\n- 关系：包含人际关系、社交网络\n- 其他：无法归入以上类别的内容",
+        "hint": "指导AI进行记忆分类的详细规则提示词",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "category_weights": {
+        "type": "text",
+        "description": "类别重要性权重",
+        "default": "{\n  \"事实\": 0.8,\n  \"观点\": 0.6,\n  \"用户偏好\": 1.0,\n  \"事件\": 0.7,\n  \"关系\": 0.9,\n  \"其他\": 0.3\n}",
+        "hint": "设置每个记忆类别的重要性权重（0.0-2.0），权重越高表示该类别记忆越重要",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      },
+      "weight_adjustment_guide": {
+        "type": "text",
+        "description": "权重调整指南",
+        "default": "类别重要性权重说明：\n\n• 事实 (0.8): 客观信息，如姓名、年龄、职业等\n• 观点 (0.6): 主观看法和评价\n• 用户偏好 (1.0): 喜好、厌恶、习惯等 - 通常最重要\n• 事件 (0.7): 时间相关的事件和经历\n• 关系 (0.9): 人际关系和社交网络 - 通常很重要\n• 其他 (0.3): 无法分类的内容 - 通常最不重要\n\n调整建议：\n- 权重范围：0.0-2.0\n- 默认权重总和建议保持在4.0左右\n- 用户偏好和关系通常设置较高权重\n- 其他类别通常设置较低权重",
+        "hint": "类别权重调整指南和说明",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      }
+    }
+  },
+  
+  "prompt_templates": {
+    "type": "object",
+    "description": "提示词模板配置",
+    "items": {
+      "enable_custom_prompts": {
+        "type": "bool",
+        "description": "启用自定义提示词",
+        "default": true,
+        "hint": "是否启用自定义提示词功能",
+        "obvious_hint": true
+      },
+      "prompt_management": {
+        "type": "text",
+        "description": "提示词管理",
+        "default": "{\n  \"extraction_templates\": {\n    \"default\": \"请从以下对话中提取可能重要的信息作为长期记忆。重点关注：个人偏好、重要事实、情感表达、重复提到的话题。\",\n    \"detailed\": \"请详细分析对话内容，提取以下类型的信息：\\\\n1. 个人基本信息\\\\n2. 兴趣爱好\\\\n3. 重要经历\\\\n4. 情感态度\\\\n5. 重复主题\\\\n6. 技能专长\\\\n7. 社交关系\\\\n8. 未来计划\",\n    \"minimal\": \"仅提取最关键的个人信息和偏好\"\n  },\n  \"processing_templates\": {\n    \"default\": \"请分析以下记忆内容，进行智能分类、总结和关联建议。\",\n    \"detailed\": \"请对记忆库进行全面分析：分类整理、去重检测、关联建议、重要性评估、情感分析\",\n    \"minimal\": \"简单分类和总结记忆内容\"\n  },\n  \"categorization_templates\": {\n    \"default\": \"请分析以下记忆内容，并建议更好的分类方式。\",\n    \"detailed\": \"请为每段记忆建议最合适的分类，并提供分类理由和置信度\"\n  }\n}",
+        "hint": "管理所有提示词模板，可以在这里添加、修改或删除提示词模板",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-dark"
+      },
+      "prompt_variables": {
+        "type": "text",
+        "description": "提示词变量",
+        "default": "{\n  \"available_variables\": {\n    \"{conversation_history}\": \"完整的对话历史\",\n    \"{current_message}\": \"当前消息内容\", \n    \"{memory_content}\": \"记忆内容\",\n    \"{memory_type}\": \"记忆类型\",\n    \"{memory_importance}\": \"记忆重要性\",\n    \"{user_id}\": \"用户ID\",\n    \"{user_name}\": \"用户名\"\n  }\n}",
+        "hint": "可在提示词中使用的变量列表",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      }
+    }
+  },
+  
+  "importance_calculation": {
+    "type": "object",
+    "description": "重要性计算配置",
+    "items": {
+      "enable_weighted_importance": {
+        "type": "bool",
+        "description": "启用加权重要性计算",
+        "default": true,
+        "hint": "是否使用类别权重来计算记忆重要性",
+        "obvious_hint": true
+      },
+      "base_importance_factors": {
+        "type": "text",
+        "description": "基础重要性因子",
+        "default": "{\n  \"personal_pronouns\": 0.2,\n  \"emotion_words\": 0.3,\n  \"important_verbs\": 0.2,\n  \"numbers\": 0.1,\n  \"context_importance\": 0.2\n}",
+        "hint": "基础重要性计算中各因素的权重",
+        "editor_mode": true,
+        "editor_language": "json",
+        "editor_theme": "vs-light"
+      },
+      "importance_calculation_formula": {
+        "type": "text",
+        "description": "重要性计算公式",
+        "default": "最终重要性 = 基础重要性 × 类别权重 × 上下文调整\n\n其中：\n- 基础重要性 = 各因素权重之和（0.1-1.0）\n- 类别权重 = 类别配置的权重（0.0-2.0）\n- 上下文调整 = 基于对话上下文的调整因子（0.8-1.2）\n\n示例：\n基础重要性0.6 × 用户偏好权重1.0 × 上下文调整1.1 = 最终重要性0.66",
+        "hint": "记忆重要性计算的详细公式说明",
+        "editor_mode": true,
+        "editor_language": "text",
+        "editor_theme": "vs-light"
+      },
+      "auto_adjust_weights": {
+        "type": "bool",
+        "description": "自动调整权重",
+        "default": false,
+        "hint": "是否根据记忆使用频率自动调整类别权重"
+      },
+      "weight_learning_rate": {
+        "type": "float",
+        "description": "权重学习速率",
+        "default": 0.1,
+        "hint": "自动调整权重时的学习速率（0.01-0.5）",
+        "min": 0.01,
+        "max": 0.5,
+        "step": 0.01
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# 完整功能依赖（可选）
+faiss-cpu>=1.7.2
+sentence-transformers>=2.2.2
+jieba>=0.42.1
+networkx>=2.8.8
+numpy>=1.24.3
+
+# 高级功能依赖（可选）
+transformers>=4.30.2
+torch>=2.0.1; sys_platform != "win32"
+torch>=1.9.0; sys_platform == "win32"
+
+# 基础依赖（必需）
+pydantic>=1.10.0,<2.0.0

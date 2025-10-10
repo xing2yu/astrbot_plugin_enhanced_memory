@@ -1,0 +1,14 @@
+id: enhanced_memory
+name: 增强记忆插件 v1.0
+version: 1.0.0
+author: 星辰向鱼
+description: 完整的记忆管理系统，支持AI智能梳理、自动提取、关联管理和数据导入导出
+repository: https://github.com/xing2yu/astrbot_plugin_enhanced_memory
+license: MIT
+tags:
+  - memory
+  - enhancement
+  - ai
+  - organization
+  - semantic-search
+  - auto-extraction
